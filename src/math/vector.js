@@ -9,6 +9,10 @@ export class Vector2 {
     return zero;
   }
 
+  static fromOrientation(orientation) {
+    return new Vector2(Math.cos(orientation), Math.sin(orientation));
+  }
+
   norm() {
     return Math.sqrt(this.x**2 + this.y**2);
   }

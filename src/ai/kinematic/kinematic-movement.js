@@ -2,8 +2,7 @@ import { KinematicSteeringOutput } from '../structure.js';
 import { Vector2 } from '../../math/vector.js';
 
 class KinematicMovement {
-  constructor(name, maxSpeed) {
-    this.name = name;
+  constructor(maxSpeed) {
     // dados estáticos sobre o agente e seu alvo
     this.target = null;
     // velocidade máxima que o agente pode viajar
@@ -24,7 +23,7 @@ class KinematicMovement {
 
 export class KinematicSeek extends KinematicMovement {
   constructor(maxSpeed) {
-    super('Seek', maxSpeed);
+    super(maxSpeed);
   }
 
   getSteering(agentPose) {
@@ -41,7 +40,7 @@ export class KinematicSeek extends KinematicMovement {
 
 export class KinematicArrive extends KinematicMovement {
   constructor(maxSpeed) {
-    super('Arrive', maxSpeed);
+    super(maxSpeed);
     this.radius = 5;
     this.timeToTarget = 0.25;
   }
@@ -68,6 +67,25 @@ export class KinematicArrive extends KinematicMovement {
 
     return new KinematicSteeringOutput(velocity, 0);
   }
+}
 
+export class KinematicWander extends KinematicMovement {
+  constructor(maxSpeed, maxRotation = 0.1) {
+    super(maxSpeed);
+    this.maxRotation = maxRotation;
+  }
 
+  getSteering(agentPose) {
+    // pega a velocidade por meio do vetor orientação
+    let velocity = Vector2.fromOrientation(agentPose.orientation).mult(this.maxSpeed);
+
+    // altera a orientação aleatoriamente
+    let rotation = this.randomBinomial() * this.maxRotation;
+    
+    return new KinematicSteeringOutput(velocity, rotation);
+  }
+
+  randomBinomial() {
+    return Math.random() - Math.random();
+  }
 }

@@ -1,5 +1,5 @@
 import { KinematicAgent } from "./ai/agent.js";
-import { KinematicSeek, KinematicArrive } from "./ai/kinematic/kinematic-movement.js";
+import { KinematicSeek, KinematicArrive, KinematicWander } from "./ai/kinematic/kinematic-movement.js";
 import { Pose } from "./ai/structure.js";
 import { Vector2 } from "./math/vector.js";
 import { Toolbar } from "./tools/tool.js";
@@ -15,7 +15,8 @@ export default class Stage {
     this.kinematic = {
       seek: new KinematicSeek( 50),
       flee: new KinematicSeek(-50),
-      arrive: new KinematicArrive(50)
+      arrive: new KinematicArrive(50),
+      wander: new KinematicWander(50, 2)
     };
     this.toolbar = new Toolbar(document.createElement('div'));
     this.toolbar.addTool(new AddAgentTool(this));
@@ -32,7 +33,7 @@ export default class Stage {
 
   update(time) {
     // atualiza agentes
-    this.agents.forEach(a => a.update(time));
+    this.agents.forEach(a => a.update(time, this));
 
     // atualiza rotação e escala do alvo, pra ficar bonito
     this.target.orientation += 0.5 * time;
@@ -49,9 +50,9 @@ export default class Stage {
       ctx.translate(a.pose.position.x, a.pose.position.y);
       ctx.rotate(a.pose.orientation);
       ctx.beginPath();
-      ctx.moveTo(-8, -4);
-      ctx.lineTo(-8,  4);
-      ctx.lineTo( 8,  0);
+      ctx.moveTo(-a.radius, -a.radius/2);
+      ctx.lineTo(-a.radius,  a.radius/2);
+      ctx.lineTo( a.radius,  0);
       ctx.closePath();
       ctx.fillStyle = '#333';
       ctx.fill();
