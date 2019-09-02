@@ -1,5 +1,5 @@
 import { KinematicAgent } from "./ai/agent.js";
-import { KinematicSeek } from "./ai/kinematic/kinematic-movement.js";
+import { KinematicSeek, KinematicArrive } from "./ai/kinematic/kinematic-movement.js";
 import { Pose } from "./ai/structure.js";
 import { Vector2 } from "./math/vector.js";
 import { Toolbar } from "./tools/tool.js";
@@ -14,7 +14,8 @@ export default class Stage {
     this.target = new Pose();
     this.kinematic = {
       seek: new KinematicSeek( 50),
-      flee: new KinematicSeek(-50)
+      flee: new KinematicSeek(-50),
+      arrive: new KinematicArrive(50)
     };
     this.toolbar = new Toolbar(document.createElement('div'));
     this.toolbar.addTool(new AddAgentTool(this));

@@ -1,5 +1,5 @@
 import { KinematicSteeringOutput } from '../structure.js';
-// import { Vector2 } from '../../math/vector.js';
+import { Vector2 } from '../../math/vector.js';
 
 class KinematicMovement {
   constructor(name, maxSpeed) {
@@ -37,4 +37,37 @@ export class KinematicSeek extends KinematicMovement {
 
     return new KinematicSteeringOutput(velocity, 0);
   }
+}
+
+export class KinematicArrive extends KinematicMovement {
+  constructor(maxSpeed) {
+    super('Arrive', maxSpeed);
+    this.radius = 5;
+    this.timeToTarget = 0.25;
+  }
+
+  getSteering(agentPose) {
+    let velocity = this.target.position.sub(agentPose.position);
+    
+    // se estiver dentro do raio de satisfação, põe velocidade 0
+    if (velocity.norm() < this.radius) {
+      return new KinematicSteeringOutput(Vector2.ZERO, 0);
+    }
+   
+    // vai reduzindo velocidade
+    velocity = velocity.mult(1/this.timeToTarget);
+
+    // limita a velocidade a maxSpeed
+    if (velocity.norm() > this.maxSpeed) {
+      velocity = velocity.normalize();
+      velocity = velocity.mult(this.maxSpeed);
+    }
+
+    // orientação de acordo com velocidade
+    agentPose.orientation = super.getNewOrientation(agentPose.orientation, velocity);
+
+    return new KinematicSteeringOutput(velocity, 0);
+  }
+
+
 }
