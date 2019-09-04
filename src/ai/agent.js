@@ -39,17 +39,33 @@ export class KinematicAgent extends Agent {
     this.pose.update(steering, time);
     this.revolve(stage);
   }
+
+  static get factory() {
+    return {
+      create(movement, position, orientation) {
+        return new KinematicAgent(movement, new Pose(position, orientation));
+      }
+    }
+  }
 }
 
 export class DynamicAgent extends Agent {
-  constructor(movement) {
+  constructor(movement, pose = new Kinematic()) {
     super(movement);
-    this.pose = new Kinematic();
+    this.pose = pose;
   }
   
-  update(time, stage) {
-    const steering = this.movement.getSteering();
-    this.pose.update(steering, time);
+  update(time, stage, maxSpeed) {
+    const steering = this.movement.getSteering(this.pose);
+    this.pose.update(steering, maxSpeed, time);
     this.revolve(stage);
+  }
+  
+  static get factory() {
+    return {
+      create(movement, position, orientation) {
+        return new DynamicAgent(movement, new Kinematic(position, orientation));
+      }
+    }
   }
 }

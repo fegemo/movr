@@ -1,9 +1,10 @@
-import { KinematicAgent } from "./ai/agent.js";
+import { KinematicAgent, DynamicAgent } from "./ai/agent.js";
 import { KinematicSeek, KinematicArrive, KinematicWander } from "./ai/kinematic/kinematic-movement.js";
 import { Pose } from "./ai/structure.js";
 import { Vector2 } from "./math/vector.js";
 import { Toolbar } from "./tools/tool.js";
 import { AddAgentTool } from "./tools/addAgentTool.js";
+import { DynamicSeek, DynamicFlee, DynamicArrive } from "./ai/dynamic/dynamic-movement.js";
 
 // Um palco pode ter vários agentes,
 // um objetivo, vários obstáculos
@@ -13,13 +14,19 @@ export default class Stage {
     this.agents = [];
     this.target = new Pose();
     this.kinematic = {
-      seek: new KinematicSeek( 50),
-      flee: new KinematicSeek(-50),
-      arrive: new KinematicArrive(50),
-      wander: new KinematicWander(50, 2)
+      seek: new KinematicSeek( 100),
+      flee: new KinematicSeek(-100),
+      arrive: new KinematicArrive(100),
+      wander: new KinematicWander(100, 10)
+    };
+    this.dynamic = {
+      seek: new DynamicSeek(100, 400),
+      flee: new DynamicFlee(100, 400),
+      arrive: new DynamicArrive(100, 400),
     };
     this.toolbar = new Toolbar(document.createElement('div'));
-    this.toolbar.addTool(new AddAgentTool(this));
+    this.toolbar.addTool(new AddAgentTool(this, this.kinematic, KinematicAgent.factory));
+    this.toolbar.addTool(new AddAgentTool(this, this.dynamic, DynamicAgent.factory));
     document.body.appendChild(this.toolbar.el);
   }
 
@@ -33,7 +40,7 @@ export default class Stage {
 
   update(time) {
     // atualiza agentes
-    this.agents.forEach(a => a.update(time, this));
+    this.agents.forEach(a => a.update(time, this, this.dynamic.arrive.maxSpeed));
 
     // atualiza rotação e escala do alvo, pra ficar bonito
     this.target.orientation += 0.5 * time;
@@ -90,8 +97,8 @@ export default class Stage {
 
   }
 
-  addAgent(position = Vector2.ZERO, orientation = 0, movement = this.kinematic.seek) {
-    const newAgent = new KinematicAgent(movement, new Pose(position, orientation));
+  addAgent(position = Vector2.ZERO, orientation = 0, movement, agentFactory) {
+    const newAgent = agentFactory.create(movement, position, orientation);
     newAgent.target = this.target;
     this.agents.push(newAgent);
   }

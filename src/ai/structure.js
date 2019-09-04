@@ -20,12 +20,18 @@ export class Kinematic extends Pose {
     this.rotation = rotation;
   }
   
-  update(steering, time) {
-    super.update(time);
+  update(steering, maxSpeed, time) {
+    this.position = this.position.add(this.velocity.mult(time));
+    this.orientation = this.orientation + this.rotation * time;
 
-    // atualiza a velocidade linear e angular
+      // atualiza a velocidade linear e angular
     this.velocity = this.velocity.add(steering.linear.mult(time));
-    this.orientation = this.orientation.add(steering.angular.mult(time));
+    this.orientation = this.orientation + (steering.angular * time);
+
+    // se a velocidade linear exceder a máxima, limitar
+    if (this.velocity.norm() > maxSpeed) {
+      this.velocity = this.velocity.normalize().mult(maxSpeed);
+    }
   }
 }
 
