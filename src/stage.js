@@ -2,8 +2,9 @@ import { KinematicAgent, DynamicAgent } from "./ai/agent.js";
 import { KinematicSeek, KinematicArrive, KinematicWander } from "./ai/kinematic/kinematic-movement.js";
 import { Pose } from "./ai/structure.js";
 import { Vector2 } from "./math/vector.js";
-import { Toolbar } from "./tools/tool.js";
-import { AddAgentTool } from "./tools/addAgentTool.js";
+import { Toolbar, ExclusionGroup } from "./tools/tool.js";
+import { AddAgentTool } from "./tools/add-agent.js";
+import { ClearTool } from "./tools/clear.js";
 import { DynamicSeek, DynamicFlee, DynamicArrive } from "./ai/dynamic/dynamic-movement.js";
 
 // Um palco pode ter vários agentes,
@@ -25,8 +26,10 @@ export default class Stage {
       arrive: new DynamicArrive(100, 400),
     };
     this.toolbar = new Toolbar(document.createElement('div'));
-    this.toolbar.addTool(new AddAgentTool(this, this.kinematic, KinematicAgent.factory));
-    this.toolbar.addTool(new AddAgentTool(this, this.dynamic, DynamicAgent.factory));
+    this.toolbar.addTool(new ClearTool(this));
+    const exclusionGroup = new ExclusionGroup();
+    this.toolbar.addTool(new AddAgentTool(this, this.kinematic, KinematicAgent.factory).addToExclusionGroup(exclusionGroup));
+    this.toolbar.addTool(new AddAgentTool(this, this.dynamic, DynamicAgent.factory).addToExclusionGroup(exclusionGroup));
     document.body.appendChild(this.toolbar.el);
   }
 

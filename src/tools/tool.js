@@ -38,6 +38,17 @@ export class ToggleTool extends Tool {
     this.state = !this.state;
     this.buttonEl = this.el.tagName.toLowerCase() === 'button' ? this.el : this.el.querySelector('button');
     this.buttonEl.style.filter = this.state ? 'invert(100%)' : 'inherit';
+
+    // se há um grupo de ferramentas e esta acabou de ser habilitada, desabilitar as outras
+    if (this.group && this.state) {
+      this.group.setActive(this);
+    }
+  }
+
+  addToExclusionGroup(group) {
+    this.group = group;
+    group.addTool(this);
+    return this;
   }
 }
 
@@ -59,5 +70,24 @@ export class Toolbar {
   addTool(tool) {
     this.tools.push(tool);
     this.el.appendChild(tool.el);
+  }
+}
+
+export class ExclusionGroup {
+  constructor() {
+    this.tools = [];
+  }
+
+  addTool(tool) {
+    this.tools.push(tool);
+    
+  }
+
+  setActive(tool) {
+    // ativa a ferramenta solicitada
+    this.tools.filter(t => t === tool && !t.state).forEach(t => t.do());
+
+    // desativa as ferramentas que estavam ativas (esperado no máximo 1)
+    this.tools.filter(t => t !== tool && t.state).forEach(t => t.do());
   }
 }
