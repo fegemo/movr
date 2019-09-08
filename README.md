@@ -5,7 +5,7 @@ movement algorithms.
 
 ## Roadmap
 
-- ( ) Draw a grid in the background
+- (x) Draw a grid in the background
 - ( ) Allow setting an agent as target
 - ( ) Differentiate (w/ color?) kinematic from dynamic agents
 - ( ) Visual debugging information (vectors, radii)

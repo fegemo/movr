@@ -7,6 +7,8 @@ import { AddAgentTool } from "./tools/add-agent.js";
 import { ClearTool } from "./tools/clear.js";
 import { DynamicSeek, DynamicFlee, DynamicArrive } from "./ai/dynamic/dynamic-movement.js";
 
+const GRID_SIZE = 30;
+
 // Um palco pode ter vários agentes,
 // um objetivo, vários obstáculos
 export default class Stage {
@@ -53,6 +55,17 @@ export default class Stage {
   render(ctx) {
     ctx.save();
     // desenha o cenário
+    ctx.strokeStyle = '#aaa';
+    for (let x = 0; x < this.canvas.el.width; x += GRID_SIZE) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, this.canvas.el.height - 1);
+    }
+    for (let y = 0; y < this.canvas.el.height; y += GRID_SIZE) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.canvas.el.width - 1, y);
+    }
+    ctx.strokeStyle = '#ddd';
+    ctx.stroke();
 
     // desenha os agentes
     this.agents.forEach(a => {
@@ -68,9 +81,10 @@ export default class Stage {
       ctx.fill();
       ctx.restore();
     });
-
+    
     // desenha o objetivo
     ctx.save();
+    ctx.strokeStyle = '#333';
     ctx.setLineDash([2, 1]);/*dashes are 5px and spaces are 3px*/
     ctx.beginPath();
     ctx.translate(this.target.position.x, this.target.position.y);
