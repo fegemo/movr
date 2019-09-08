@@ -1,6 +1,7 @@
 import { KinematicAgent, DynamicAgent } from "./ai/agent.js";
 import { KinematicSeek, KinematicArrive, KinematicWander } from "./ai/kinematic/kinematic-movement.js";
 import { Pose } from "./ai/structure.js";
+import { Target } from "./ai/target.js";
 import { Vector2 } from "./math/vector.js";
 import { Toolbar, ExclusionGroup } from "./tools/tool.js";
 import { AddAgentTool } from "./tools/add-agent.js";
@@ -15,7 +16,7 @@ export default class Stage {
   
   constructor() {
     this.agents = [];
-    this.target = new Pose();
+    this.target = new Target();
     this.kinematic = {
       seek: new KinematicSeek( 100),
       flee: new KinematicSeek(-100),
@@ -48,8 +49,7 @@ export default class Stage {
     this.agents.forEach(a => a.update(time, this, this.dynamic.arrive.maxSpeed));
 
     // atualiza rotação e escala do alvo, pra ficar bonito
-    this.target.orientation += 0.5 * time;
-    this.target.scale = Math.sin(this.target.orientation * Math.PI) / 5 + 2;
+    this.target.update(time);
   }
 
   render(ctx) {
@@ -83,16 +83,7 @@ export default class Stage {
     });
     
     // desenha o objetivo
-    ctx.save();
-    ctx.strokeStyle = '#333';
-    ctx.setLineDash([2, 1]);/*dashes are 5px and spaces are 3px*/
-    ctx.beginPath();
-    ctx.translate(this.target.position.x, this.target.position.y);
-    ctx.rotate(this.target.orientation);
-    ctx.scale(this.target.scale, this.target.scale);
-    ctx.arc(0, 0, 8, 0, 2*Math.PI, false);
-    ctx.stroke();
-    ctx.restore();
+    this.target.render(ctx);
 
     // desenha os obstáculos
 
@@ -106,7 +97,14 @@ export default class Stage {
       case 1: // middle
         break;
       case 2: // right
-        this.target.position = new Vector2(e.clientX, e.clientY);
+        // se click acertou um agente, defini-lo como alvo
+        const clickPosition = new Vector2(e.clientX, e.clientY);
+        const agentHit = this.agents.find(a => a.pose.position.sub(clickPosition).norm() <= a.radius*2);
+        if (agentHit) {
+          this.target.agentTarget = agentHit;
+        } else {
+          this.target.staticTarget = new Vector2(e.clientX, e.clientY);
+        }
     }
   }
 
